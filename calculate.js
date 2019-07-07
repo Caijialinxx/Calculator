@@ -56,14 +56,9 @@ var Calculator = /** @class */ (function () {
                 var buttonVal = e.target.textContent;
                 if ('1234567890.'.indexOf(buttonVal) > -1) {
                     // 当按数字键时，如果操作符存在，那么一定是对n2进行赋值
-                    if (_this.operator) {
-                        _this.n2 = _this.getNewNumString(_this.n2, buttonVal);
-                        _this.outputSpan.textContent = _this.n2;
-                    }
-                    else {
-                        _this.n1 = _this.getNewNumString(_this.n1, buttonVal);
-                        _this.outputSpan.textContent = _this.n1;
-                    }
+                    var target = _this.operator ? 'n2' : 'n1';
+                    _this[target] = _this.getNewNumString(_this[target], buttonVal);
+                    _this.outputSpan.textContent = _this[target];
                 }
                 else {
                     if ('+-×÷'.indexOf(buttonVal) > -1) {
@@ -85,10 +80,10 @@ var Calculator = /** @class */ (function () {
                         _this.result = _this.getResult(_this.n1, _this.n2, _this.operator);
                         _this.outputSpan.textContent = _this.result;
                         _this.n1 = _this.result;
-                        _this.stepNum = _this.n2;
-                        _this.prevOperator = _this.operator;
-                        _this.operator = '';
-                        _this.n2 = '';
+                        _this.stepNum = _this.n2; // 暂存n2，使得后面可以继续逐级计算
+                        _this.prevOperator = _this.operator; // 暂存操作符，使得后面可以继续逐级计算
+                        _this.operator = ''; // 清空操作符，以准备存储新操作符
+                        _this.n2 = ''; // 清空n2，以准备存储新值
                     }
                     else if (buttonVal === '+/-') {
                         if (_this.n2) {
@@ -101,16 +96,20 @@ var Calculator = /** @class */ (function () {
                         }
                     }
                     else {
-                        // clear
-                        _this.n1 = '';
-                        _this.n2 = '';
-                        _this.operator = '';
-                        _this.result = '0';
-                        _this.outputSpan.textContent = _this.result;
+                        _this.resetAll();
                     }
                 }
             }
         });
+    };
+    Calculator.prototype.resetAll = function () {
+        this.n1 = '';
+        this.n2 = '';
+        this.operator = '';
+        this.result = '0';
+        this.stepNum = '';
+        this.prevOperator = '';
+        this.outputSpan.textContent = this.result;
     };
     Calculator.prototype.getNewNumString = function (originVal, inputVal) {
         var result = (!(inputVal === '.' && originVal.match(/\./g))) ? originVal + inputVal : originVal;
